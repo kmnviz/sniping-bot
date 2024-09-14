@@ -79,7 +79,7 @@ telegramBot.launch();
             const message = `
 ‼️ NEW PAIR @ UniSwap V2 🦄 ‼️
 
-ticker: ${token0Symbol} / ${token1Symbol}
+ticker: ${token0Symbol.replace('.', ',')} / ${token1Symbol}
 liquidity: ${liquidityToken0.replace('.', ',')} / ${liquidityToken1.replace('.', ',')}
 liquidity percentage: ${liquidityPercentageToken0.replace('.', ',')}
 token price: $${tokenPriceInUsdc.replace('.', ',')}
