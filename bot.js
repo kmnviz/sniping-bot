@@ -24,7 +24,7 @@ const calculateTokenPrice = async (tokenReserve, wethReserve, tokenDecimals) => 
     const wethPriceInUsdc = normalizedUsdcReserve.div(normalizedWethUsdcReserve);
     const tokenPriceInUsdc = tokenPriceInWeth.mul(wethPriceInUsdc);
 
-    return tokenPriceInUsdc.toString();
+    return tokenPriceInUsdc.toFixed(18);
 }
 
 telegramBot.launch();
@@ -66,17 +66,12 @@ telegramBot.launch();
             const token1Symbol = await token1Contract.symbol();
             const token1Decimals = (await token1Contract.decimals()).toString();
 
-            const liquidityToken0 = Decimal(Decimal(reserves[0].toString()).div(Decimal(10).pow(token0Decimals)))
-                .toFixed(3).replace('.', ',');
-            const liquidityPercentageToken0 = Decimal(reserves[0].toString()).div(token0TotalSupply).times(100)
-                .toFixed(2).replace('.', ',');
-            const liquidityToken1 = Decimal(Decimal(reserves[1].toString()).div(Decimal(10).pow(token1Decimals)))
-                .toFixed(3).replace('.', ',');
+            const liquidityToken0 = Decimal(Decimal(reserves[0].toString()).div(Decimal(10).pow(token0Decimals))).toFixed(3);
+            const liquidityPercentageToken0 = Decimal(reserves[0].toString()).div(token0TotalSupply).times(100).toFixed(2);
+            const liquidityToken1 = Decimal(Decimal(reserves[1].toString()).div(Decimal(10).pow(token1Decimals))).toFixed(3);
 
-            const tokenPriceInUsdc = (await calculateTokenPrice(reserves[0].toString(), reserves[1].toString(), token0Decimals))
-                .replace('.', ',');
-            const tokenMarketCapInUsdc = Decimal(token0TotalSupply).mul(tokenPriceInUsdc).toFixed(2)
-                .replace('.', ',');
+            const tokenPriceInUsdc = (await calculateTokenPrice(reserves[0].toString(), reserves[1].toString(), token0Decimals));
+            const tokenMarketCapInUsdc = Decimal(token0TotalSupply).mul(tokenPriceInUsdc).toFixed(2);
 
             const etherscan = `[etherscan](https://etherscan.io/address/${pairAddress})`;
             const dextools = `[dextools](https://www.dextools.io/app/en/ether/pair-explorer/${pairAddress})`;
@@ -85,10 +80,10 @@ telegramBot.launch();
 ‼️ NEW PAIR @ UniSwap V2 🦄 ‼️
 
 ticker: ${token0Symbol}/${token1Symbol}
-liquidity: ${liquidityToken0} / ${liquidityToken1}
-liquidity percentage: ${liquidityPercentageToken0}
-token price: ${tokenPriceInUsdc}
-market cap: ${tokenMarketCapInUsdc}
+liquidity: ${liquidityToken0.replace('.', ',')} / ${liquidityToken1.replace('.', ',')}
+liquidity percentage: ${liquidityPercentageToken0.replace('.', ',')}
+token price: ${tokenPriceInUsdc.replace('.', ',')}
+market cap: ${tokenMarketCapInUsdc.replace('.', ',')}
 
 ${dextools} ${etherscan}
 
