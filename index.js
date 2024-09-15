@@ -102,7 +102,7 @@ liquidity: ${liquidityToken0.replace('.', ',')} / ${liquidityToken1.replace('.',
 liquidity percentage: ${liquidityPercentageToken0.replace('.', ',')}
 token price: $${tokenPriceInUsdc.replace('.', ',')}
 market cap: $${tokenMarketCapInUsdc.replace('.', ',')}
-locked liquidity: ${Decimal(lockedLiquidity.lockedPercentage).toFixed(2).replace('.', '.')}% 
+locked liquidity: ${Decimal(lockedLiquidity.lockedPercentage).toFixed(2).replace('.', ',')}% 
 
 ${dextools} ${etherscan}
 
