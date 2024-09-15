@@ -27,6 +27,22 @@ const calculateTokenPrice = async (tokenReserve, wethReserve, tokenDecimals) => 
     return tokenPriceInUsdc.toFixed(18);
 }
 
+const isLiquidityLocked = async (pairAddress) => {
+    const pairContract = new Contract(pairAddress, blockchain.uniSwapV2PairAbi, provider);
+    const totalSupply = (await pairContract.totalSupply()).toString();
+    const uncxAmount = (await pairContract.balanceOf(blockchain.uncxLockLPEthereumAddress)).toString();
+    const tfAmount = (await pairContract.balanceOf(blockchain.teamFinanceLockLPEthereumAddress)).toString();
+    const flokiAmount = (await pairContract.balanceOf(blockchain.flokiLockLPEthereumAddress)).toString();
+    const pinkSaleAmount = (await pairContract.balanceOf(blockchain.pinkSaleLockLPEthereumAddress)).toString();
+    const totalLocked = Decimal(uncxAmount).plus(tfAmount).plus(flokiAmount).plus(pinkSaleAmount).toString();
+
+    return {
+        totalSupply: totalSupply,
+        totalLocked: totalLocked,
+        lockedPercentage: Decimal(totalLocked).div(totalSupply).times(100).toString(),
+    };
+}
+
 telegramBot.launch();
 (async () => {
     await uniSwapV2Factory.on('PairCreated', async (token0, token1, pairAddress) => {
@@ -73,6 +89,8 @@ telegramBot.launch();
             const tokenPriceInUsdc = (await calculateTokenPrice(reserves[0].toString(), reserves[1].toString(), token0Decimals));
             const tokenMarketCapInUsdc = Decimal(token0TotalSupply).mul(tokenPriceInUsdc).toFixed(2);
 
+            const lockedLiquidity = await isLiquidityLocked(pairAddress);
+
             const etherscan = `[etherscan](https://etherscan.io/address/${pairAddress})`;
             const dextools = `[dextools](https://www.dextools.io/app/en/ether/pair-explorer/${pairAddress})`;
 
@@ -84,6 +102,7 @@ liquidity: ${liquidityToken0.replace('.', ',')} / ${liquidityToken1.replace('.',
 liquidity percentage: ${liquidityPercentageToken0.replace('.', ',')}
 token price: $${tokenPriceInUsdc.replace('.', ',')}
 market cap: $${tokenMarketCapInUsdc.replace('.', ',')}
+locked liquidity: ${Decimal(lockedLiquidity.lockedPercentage).toFixed(2).replace('.', '.')}% 
 
 ${dextools} ${etherscan}
 
