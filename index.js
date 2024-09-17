@@ -3,6 +3,7 @@ const { WebSocketProvider, Contract } = require('ethers');
 const Decimal = require('decimal.js');
 const blockchain = require('./blockchain.json');
 const telegramBot = require('./telegramBot');
+const { safeTelegramFormat } = require('./utils');
 
 const provider = new WebSocketProvider(process.env.RPC_URL_WEBSOCKET);
 
@@ -90,6 +91,7 @@ telegramBot.launch();
             const tokenMarketCapInUsdc = Decimal(token0TotalSupply).mul(tokenPriceInUsdc).toFixed(2);
 
             const lockedLiquidity = await isLiquidityLocked(pairAddress);
+            const lockedLiquidityPercentage = Decimal(lockedLiquidity.lockedPercentage).toFixed(2);
 
             const etherscan = `[etherscan](https://etherscan.io/address/${pairAddress})`;
             const dextools = `[dextools](https://www.dextools.io/app/en/ether/pair-explorer/${pairAddress})`;
@@ -97,12 +99,10 @@ telegramBot.launch();
             const message = `
 ‼️ NEW PAIR @ UniSwap V2 🦄 ‼️
 
-ticker: ${token0Symbol.replace('.', ',')} / ${token1Symbol}
-liquidity: ${liquidityToken0.replace('.', ',')} / ${liquidityToken1.replace('.', ',')}
-liquidity percentage: ${liquidityPercentageToken0.replace('.', ',')}
-token price: $${tokenPriceInUsdc.replace('.', ',')}
-market cap: $${tokenMarketCapInUsdc.replace('.', ',')}
-locked liquidity: ${Decimal(lockedLiquidity.lockedPercentage).toFixed(2).replace('.', ',')}% 
+ticker: ${safeTelegramFormat(token0Symbol)} / ${token1Symbol}
+liquidity: ${safeTelegramFormat(liquidityToken0)} / ${safeTelegramFormat(liquidityToken1)}
+liquidity percentage: ${safeTelegramFormat(liquidityPercentageToken0)}%
+token price: $${safeTelegramFormat(tokenPriceInUsdc)}
 
 ${dextools} ${etherscan}
 
