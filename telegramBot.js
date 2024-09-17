@@ -23,7 +23,7 @@ const telegramBotCommandArgs = () => (ctx, next) => {
                 args,
             };
         } else {
-            console.log(`Telegram message has no text. ${ctx?.update?.message}`);
+            console.log('Telegram message has no text.', ctx?.update?.message);
         }
     }
     return next();
