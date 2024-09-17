@@ -88,10 +88,11 @@ telegramBot.launch();
             const liquidityToken1 = Decimal(Decimal(reserves[1].toString()).div(Decimal(10).pow(token1Decimals))).toFixed(3);
 
             const tokenPriceInUsdc = (await calculateTokenPrice(reserves[0].toString(), reserves[1].toString(), token0Decimals));
-            const tokenMarketCapInUsdc = Decimal(token0TotalSupply).mul(tokenPriceInUsdc).toFixed(2);
 
-            const lockedLiquidity = await isLiquidityLocked(pairAddress);
-            const lockedLiquidityPercentage = Decimal(lockedLiquidity.lockedPercentage).toFixed(2);
+            // Useful info for an endpoint mb
+            // const tokenMarketCapInUsdc = Decimal(token0TotalSupply).mul(tokenPriceInUsdc).toFixed(2);
+            // const lockedLiquidity = await isLiquidityLocked(pairAddress);
+            // const lockedLiquidityPercentage = Decimal(lockedLiquidity.lockedPercentage).toFixed(2);
 
             const etherscan = `[etherscan](https://etherscan.io/address/${pairAddress})`;
             const dextools = `[dextools](https://www.dextools.io/app/en/ether/pair-explorer/${pairAddress})`;
