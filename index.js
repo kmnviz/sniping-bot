@@ -10,22 +10,27 @@ const provider = new WebSocketProvider(process.env.RPC_URL_WEBSOCKET);
 const uniSwapV2Factory = new Contract(blockchain.uniSwapV2FactoryAddress, blockchain.uniSwapV2FactoryAbi, provider);
 
 const calculateTokenPrice = async (tokenReserve, wethReserve, tokenDecimals) => {
-    const wethUsdcContract = new Contract(blockchain.usdcWethAddress, blockchain.uniSwapV2PairAbi, provider);
-    const wethUsdcReserves = await wethUsdcContract.getReserves();
+    try {
+        const wethUsdcContract = new Contract(blockchain.usdcWethAddress, blockchain.uniSwapV2PairAbi, provider);
+        const wethUsdcReserves = await wethUsdcContract.getReserves();
 
-    // Normalize token/weth reserves
-    const normalizedTokenWethReserve = new Decimal(tokenReserve).div(new Decimal(10).pow(tokenDecimals));
-    const normalizedWethReserve = new Decimal(wethReserve).div(new Decimal(10).pow(blockchain.wethDecimals));
+        // Normalize token/weth reserves
+        const normalizedTokenWethReserve = new Decimal(tokenReserve).div(new Decimal(10).pow(tokenDecimals));
+        const normalizedWethReserve = new Decimal(wethReserve).div(new Decimal(10).pow(blockchain.wethDecimals));
 
-    // Normalize weth/usdc reserves
-    const normalizedUsdcReserve = new Decimal(wethUsdcReserves[0].toString()).div(new Decimal(10).pow(blockchain.usdcDecimals));
-    const normalizedWethUsdcReserve = new Decimal(wethUsdcReserves[1].toString()).div(new Decimal(10).pow(blockchain.wethDecimals));
+        // Normalize weth/usdc reserves
+        const normalizedUsdcReserve = new Decimal(wethUsdcReserves[0].toString()).div(new Decimal(10).pow(blockchain.usdcDecimals));
+        const normalizedWethUsdcReserve = new Decimal(wethUsdcReserves[1].toString()).div(new Decimal(10).pow(blockchain.wethDecimals));
 
-    const tokenPriceInWeth = normalizedWethReserve.div(normalizedTokenWethReserve);
-    const wethPriceInUsdc = normalizedUsdcReserve.div(normalizedWethUsdcReserve);
-    const tokenPriceInUsdc = tokenPriceInWeth.mul(wethPriceInUsdc);
+        const tokenPriceInWeth = normalizedWethReserve.div(normalizedTokenWethReserve);
+        const wethPriceInUsdc = normalizedUsdcReserve.div(normalizedWethUsdcReserve);
+        const tokenPriceInUsdc = tokenPriceInWeth.mul(wethPriceInUsdc);
 
-    return tokenPriceInUsdc.toFixed(18);
+        return tokenPriceInUsdc.toFixed(18);
+    } catch (error) {
+        console.log('Failed to calculate roken price. error: ', error);
+        throw error;
+    }
 }
 
 const isLiquidityLocked = async (pairAddress) => {
