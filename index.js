@@ -51,6 +51,12 @@ const isLiquidityLocked = async (pairAddress) => {
 
 telegramBot.launch();
 (async () => {
+    provider.websocket.on('close', () => {
+        console.log('----------');
+        console.log('Connection was closed.');
+        console.log('----------');
+    });
+
     await uniSwapV2Factory.on('PairCreated', async (token0, token1, pairAddress) => {
         try {
             const token0Contract = new Contract(token0, blockchain.erc20Abi, provider);
@@ -82,14 +88,20 @@ telegramBot.launch();
                 return;
             }
 
-            const token0Symbol = await token0Contract.symbol();
+            // Check percentage liquidity provided
             const token0Decimals = (await token0Contract.decimals()).toString();
             const token0TotalSupply = (await token0Contract.totalSupply()).toString();
-            const token1Symbol = await token1Contract.symbol();
-            const token1Decimals = (await token1Contract.decimals()).toString();
-
             const liquidityToken0 = Decimal(Decimal(reserves[0].toString()).div(Decimal(10).pow(token0Decimals))).toFixed(3);
             const liquidityPercentageToken0 = Decimal(reserves[0].toString()).div(token0TotalSupply).times(100).toFixed(2);
+
+            if (Decimal(liquidityPercentageToken0).gte(Decimal(10))) {
+                console.log(`Provided liquidity higher than 10% - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+                return;
+            }
+
+            const token0Symbol = await token0Contract.symbol();
+            const token1Symbol = await token1Contract.symbol();
+            const token1Decimals = (await token1Contract.decimals()).toString();
             const liquidityToken1 = Decimal(Decimal(reserves[1].toString()).div(Decimal(10).pow(token1Decimals))).toFixed(3);
 
             const tokenPriceInUsdc = (await calculateTokenPrice(reserves[0].toString(), reserves[1].toString(), token0Decimals));
