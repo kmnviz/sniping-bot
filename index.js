@@ -1,13 +1,16 @@
 require('dotenv').config();
 const { WebSocketProvider, Contract } = require('ethers');
 const Decimal = require('decimal.js');
+const moment = require('moment');
 const blockchain = require('./blockchain.json');
 const telegramBot = require('./telegramBot');
 const { safeTelegramFormat } = require('./utils');
 
 const provider = new WebSocketProvider(process.env.RPC_URL_WEBSOCKET);
+// const bscProvider = new WebSocketProvider(process.env.RPC_URL_BSC_WEBSOCKET);
 
 const uniSwapV2Factory = new Contract(blockchain.uniSwapV2FactoryAddress, blockchain.uniSwapV2FactoryAbi, provider);
+// const pancakeSwapV2Factory = new Contract(blockchain.pancakeSwapFactoryBSCAddress, blockchain.uniSwapV2FactoryAbi, bscProvider);
 
 const calculateTokenPrice = async (tokenReserve, wethReserve, tokenDecimals) => {
     try {
@@ -65,26 +68,34 @@ telegramBot.launch();
 
             // Track only WETH pairs
             if (![token0, token1].includes(blockchain.wethAddress)) {
+                console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
                 console.log(`Not WETH pair - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+                console.log('----------');
                 return;
             }
 
             // Track only ${TOKEN}/WETH pairs
             if (token1 !== blockchain.wethAddress) {
+                console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
                 console.log(`Incorrect WETH pair - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+                console.log('----------');
                 return;
             }
 
             // If pool has no reserves HIDE it
             const reserves = await pairContract.getReserves();
             if (reserves[0] <= 0 && reserves[1] <= 0) {
+                console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
                 console.log(`Pair with no reserves - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+                console.log('----------');
                 return;
             }
 
             // Track pairs with WETH liquidity more than
             if (Decimal(reserves[1].toString()).lt(Decimal('10000000000000000000'))) {
-                console.log(`Low WETH liquidity pair - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+                console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
+                console.log(`Low WETH liquidity pair - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`)
+                console.log('----------');
                 return;
             }
 
@@ -95,7 +106,9 @@ telegramBot.launch();
             const liquidityPercentageToken0 = Decimal(reserves[0].toString()).div(token0TotalSupply).times(100).toFixed(2);
 
             if (Decimal(liquidityPercentageToken0).gte(Decimal(10))) {
+                console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
                 console.log(`Provided liquidity higher than 10% - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+                console.log('----------');
                 return;
             }
 
@@ -141,6 +154,10 @@ Good luck 🍀
             console.log(`Failed to process - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
         }
     });
+
+    // await pancakeSwapV2Factory.on('PairCreated', async (token0, token1, pairAddress) => {
+    //     console.log('PancakeSwap pair created: ', token0, token1, pairAddress);
+    // });
 
     console.log('service started...');
 })();

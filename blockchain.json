@@ -10,6 +10,8 @@
   "teamFinanceLockLPEthereumAddress": "0xE2fE530C047f2d85298b07D9333C05737f1435fB",
   "flokiLockLPEthereumAddress": "0x2b9d5c7f2EAD1A221d771Fb6bb5E35Df04D60AB0",
   "pinkSaleLockLPEthereumAddress": "0x71B5759d73262FBb223956913ecF4ecC51057641",
+  "pancakeSwapFactoryBSCAddress": "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+  "wbnbBscAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   "uniSwapV2FactoryAbi": [
     {
       "anonymous": false,
