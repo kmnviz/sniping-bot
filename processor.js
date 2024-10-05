@@ -172,10 +172,16 @@ Good luck 🍀
      *     ticker: string,
      *     sender: string,
      *     to: string,
+     *     amount: {
+     *         in0: string,
+     *         in1: string,
+     *         out0: string,
+     *         out1: string,
+     *     },
      *     price: {
      *         usdc: string,
      *         weth: string,
-     *     }
+     *     },
      * }>}
      */
     async processPairSwap(
