@@ -7,6 +7,7 @@ const Watcher = require('./watcher');
 
 const provider = new WebSocketProvider(process.env.RPC_URL_WEBSOCKET);
 
+console.log(`Telegram bot status: ${process.env.TELEGRAM_BOT_ENABLED}`);
 if (process.env.TELEGRAM_BOT_ENABLED) {
     telegramBot.launch();
 }
