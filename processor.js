@@ -190,20 +190,20 @@ Good luck 🍀
     ) {
         let token0PriceInWeth, token0PriceInUsdc;
 
-        if (Decimal(amount0In.toString()).gt(0)) {
-            const normalizedTokenPrice = Decimal(amount0In.toString())
+        if (Decimal(amount0In).gt(0)) {
+            const normalizedTokenPrice = Decimal(amount0In)
                 .div(Decimal(10).pow(pairData.token0.decimals));
-            const normalizedWethPrice = Decimal(amount1Out.toString())
+            const normalizedWethPrice = Decimal(amount1Out)
                 .div(Decimal(10).pow(blockchain.wethDecimals));
 
             token0PriceInWeth = Decimal(normalizedWethPrice)
                 .div(normalizedTokenPrice);
 
             token0PriceInUsdc = token0PriceInWeth.mul(wethPrice);
-        } else if (Decimal(amount1In.toString()).gt(0)) {
-            const normalizedTokenPrice = Decimal(amount0Out.toString())
+        } else if (Decimal(amount1In).gt(0)) {
+            const normalizedTokenPrice = Decimal(amount0Out)
                 .div(Decimal(10).pow(pairData.token0.decimals));
-            const normalizedWethPrice = Decimal(amount1In.toString())
+            const normalizedWethPrice = Decimal(amount1In)
                 .div(Decimal(10).pow(blockchain.wethDecimals));
 
             token0PriceInWeth = Decimal(normalizedWethPrice)
@@ -217,6 +217,12 @@ Good luck 🍀
             ticker: `${pairData.token0.symbol}/${pairData.token1.symbol}`,
             sender: sender,
             to: to,
+            amount: {
+                in0: amount0In,
+                in1: amount1In,
+                out0: amount0Out,
+                out1: amount1Out,
+            },
             price: {
                 usdc: token0PriceInUsdc.toFixed(18),
                 weth: token0PriceInWeth.toFixed(18),
@@ -237,12 +243,12 @@ Good luck 🍀
             const wethUsdcReserves = await wethUsdcContract.getReserves();
 
             // Normalize token/weth reserves
-            const normalizedTokenWethReserve = Decimal(tokenReserve).div(new Decimal(10).pow(tokenDecimals));
-            const normalizedWethReserve = Decimal(wethReserve).div(new Decimal(10).pow(blockchain.wethDecimals));
+            const normalizedTokenWethReserve = Decimal(tokenReserve).div(Decimal(10).pow(tokenDecimals));
+            const normalizedWethReserve = Decimal(wethReserve).div(Decimal(10).pow(blockchain.wethDecimals));
 
             // Normalize weth/usdc reserves
-            const normalizedUsdcReserve = Decimal(wethUsdcReserves[0].toString()).div(new Decimal(10).pow(blockchain.usdcDecimals));
-            const normalizedWethUsdcReserve = Decimal(wethUsdcReserves[1].toString()).div(new Decimal(10).pow(blockchain.wethDecimals));
+            const normalizedUsdcReserve = Decimal(wethUsdcReserves[0].toString()).div(Decimal(10).pow(blockchain.usdcDecimals));
+            const normalizedWethUsdcReserve = Decimal(wethUsdcReserves[1].toString()).div(Decimal(10).pow(blockchain.wethDecimals));
 
             const tokenPriceInWeth = normalizedWethReserve.div(normalizedTokenWethReserve);
             const wethPriceInUsdc = normalizedUsdcReserve.div(normalizedWethUsdcReserve);
@@ -264,8 +270,8 @@ Good luck 🍀
             const wethUsdcContract = new Contract(blockchain.usdcWethAddress, blockchain.uniSwapV2PairAbi, this.provider);
             const wethUsdcReserves = await wethUsdcContract.getReserves();
 
-            const normalizedUsdcReserve = Decimal(wethUsdcReserves[0].toString()).div(new Decimal(10).pow(blockchain.usdcDecimals));
-            const normalizedWethUsdcReserve = Decimal(wethUsdcReserves[1].toString()).div(new Decimal(10).pow(blockchain.wethDecimals));
+            const normalizedUsdcReserve = Decimal(wethUsdcReserves[0].toString()).div(Decimal(10).pow(blockchain.usdcDecimals));
+            const normalizedWethUsdcReserve = Decimal(wethUsdcReserves[1].toString()).div(Decimal(10).pow(blockchain.wethDecimals));
 
             const wethPriceInUsdc = normalizedUsdcReserve.div(normalizedWethUsdcReserve);
 
