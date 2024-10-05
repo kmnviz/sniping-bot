@@ -66,7 +66,7 @@ class Processor {
         // Track pairs with WETH liquidity more than
         if (Decimal(reserves[1].toString()).lt(Decimal('10000000000000000000'))) {
             console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
-            console.log(`Low WETH liquidity pair - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`)
+            console.log(`Low WETH liquidity pair - liquidity: ${reserves[1].toString()}, token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`)
             console.log('----------');
             return;
         }
