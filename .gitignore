@@ -2,3 +2,4 @@
 .idea
 .env
 json.json
+gcp-firestore.json

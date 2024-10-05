@@ -6,6 +6,7 @@
   "usdcAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
   "usdcDecimals": 6,
   "usdcWethAddress": "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
+  "wethUsdcAddress": "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
   "uncxLockLPEthereumAddress": "0x663a5c229c09b049e36dcc11a9b0d4a8eb9db214",
   "teamFinanceLockLPEthereumAddress": "0xE2fE530C047f2d85298b07D9333C05737f1435fB",
   "flokiLockLPEthereumAddress": "0x2b9d5c7f2EAD1A221d771Fb6bb5E35Df04D60AB0",
