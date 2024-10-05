@@ -64,7 +64,7 @@ class Processor {
         }
 
         // Track pairs with WETH liquidity more than
-        if (Decimal(reserves[1].toString()).lt(Decimal('10000000000000000000'))) {
+        if (Decimal(reserves[1].toString()).lt(Decimal(process.env.MINIMUM_WETH_LIQUIDITY_IN_WEI))) {
             console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
             console.log(`Low WETH liquidity pair - liquidity: ${reserves[1].toString()}, token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`)
             console.log('----------');
@@ -78,9 +78,9 @@ class Processor {
         const liquidityPercentageToken0 = Decimal(reserves[0].toString()).div(token0TotalSupply).times(100).toFixed(2);
 
         // Track pairs with provided liquidity less than 10%
-        if (Decimal(liquidityPercentageToken0).gte(Decimal(10))) {
+        if (Decimal(liquidityPercentageToken0).gte(Decimal(+process.env.MAX_PERCENTAGE_LIQUIDITY))) {
             console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
-            console.log(`Provided liquidity higher than 10% - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+            console.log(`Provided liquidity higher than ${process.env.MAX_PERCENTAGE_LIQUIDITY}% - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
             console.log('----------');
             return;
         }
