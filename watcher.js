@@ -115,6 +115,8 @@ class Watcher {
         pairContract.on('Mint', async (sender, amount0, amount1) => {
             try {
                 await this.database.storeMint({
+                    pair: pairData.address,
+                    ticker: `${pairData.token0.symbol}/${pairData.token1.symbol}`,
                     sender: sender,
                     amount: {
                         token0: amount0.toString(),
@@ -130,6 +132,8 @@ class Watcher {
         pairContract.on('Burn', async (sender, amount0, amount1, to) => {
             try {
                 await this.database.storeBurn({
+                    pair: pairData.address,
+                    ticker: `${pairData.token0.symbol}/${pairData.token1.symbol}`,
                     sender: sender,
                     to: to,
                     amount: {
