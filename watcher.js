@@ -60,12 +60,14 @@ class Watcher {
     async watchPairsCreated() {
         const uniSwapV2Factory = new Contract(blockchain.uniSwapV2FactoryAddress, blockchain.uniSwapV2FactoryAbi, this.provider);
 
-        uniSwapV2Factory.on('PairCreated', async (token0, token1, pairAddress) => {
+        uniSwapV2Factory.on('PairCreated', async (token0, token1, pairAddress, event) => {
             try {
-                const createdPair = await this.processor.processCreatedPair(token0, token1, pairAddress);
+                const createdPair = await this.processor.processCreatedPair(token0, token1, pairAddress, event);
                 if (createdPair) {
                     await this.database.storePair(createdPair);
-                    await this.watchCreatedPairSwaps(createdPair);
+
+                    const pairContract = new Contract(createdPair.address, blockchain.uniSwapV2PairAbi, this.provider);
+                    this.watchPairEvents(pairContract, createdPair);
                 }
             } catch (error) {
                 console.log('error: ', error);
@@ -83,55 +85,17 @@ class Watcher {
             const pairData = doc.data();
             const pairContract = new Contract(pairData.address, blockchain.uniSwapV2PairAbi, this.provider);
 
-            pairContract.on('Swap', async (sender, amount0In, amount1In, amount0Out, amount1Out, to) => {
-                try {
-                    const swap = await this.processor.processPairSwap(
-                        pairData,
-                        sender,
-                        amount0In.toString(),
-                        amount1In.toString(),
-                        amount0Out.toString(),
-                        amount1Out.toString(),
-                        to,
-                        this.wethPrice,
-                    );
-
-                    await this.database.storeSwap(swap);
-                } catch (error) {
-                    console.log('error: ', error);
-                    console.log(`Failed to process pair swap. Pair ${pairData.address}`);
-                }
-            });
+            this.watchPairEvents(pairContract, pairData);
         });
 
         console.log(`Started watchStoredPairsSwaps...`);
     }
 
-    /**
-     *
-     * @param createdPair {{
-     *     address: string,
-     *     token0: {
-     *         address: string,
-     *         symbol: string,
-     *         decimals: string,
-     *         totalSupply: string,
-     *     },
-     *     token1: {
-     *         address: string,
-     *         symbol: string,
-     *         decimals: string,
-     *         totalSupply: string,
-     *     },
-     * }}
-     * @returns {Promise<void>}
-     */
-    async watchCreatedPairSwaps(createdPair) {
-        const pairContract = new Contract(createdPair.address, blockchain.uniSwapV2PairAbi, this.provider);
-        pairContract.on('Swap', async (sender, amount0In, amount1In, amount0Out, amount1Out, to) => {
+    watchPairEvents(pairContract, pairData) {
+        pairContract.on('Swap', async (sender, amount0In, amount1In, amount0Out, amount1Out, to, event) => {
             try {
                 const swap = await this.processor.processPairSwap(
-                    createdPair,
+                    pairData,
                     sender,
                     amount0In.toString(),
                     amount1In.toString(),
@@ -139,12 +103,46 @@ class Watcher {
                     amount1Out.toString(),
                     to,
                     this.wethPrice,
+                    event,
                 );
 
                 await this.database.storeSwap(swap);
             } catch (error) {
                 console.log('error: ', error);
-                console.log(`Failed to process pair swap. Pair ${createdPair.address}`);
+                console.log(`Failed to process pair swap. Pair ${pairData.address}`);
+            }
+        });
+
+        pairContract.on('Mint', async (sender, amount0, amount1, event) => {
+            try {
+                await this.database.storeMint({
+                    blockNumber: event.blockNumber.toString(),
+                    sender: sender,
+                    amount: {
+                        token0: amount0.toString(),
+                        token1: amount1.toString(),
+                    },
+                });
+            } catch (error) {
+                console.log('error: ', error);
+                console.log(`Failed to process pair mint. Pair ${pairData.address}`);
+            }
+        });
+
+        pairContract.on('Burn', async (sender, amount0, amount1, to, event) => {
+            try {
+                await this.database.storeBurn({
+                    blockNumber: event.blockNumber.toString(),
+                    sender: sender,
+                    to: to,
+                    amount: {
+                        token0: amount0.toString(),
+                        token1: amount1.toString(),
+                    },
+                });
+            } catch (error) {
+                console.log('error: ', error);
+                console.log(`Failed to process pair mint. Pair ${pairData.address}`);
             }
         });
     }

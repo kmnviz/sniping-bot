@@ -14,6 +14,7 @@ class Database {
     /**
      *
      * @param pair{{
+     *     blockNumber: string,
      *     address: string,
      *     token0: {
      *         address: string,
@@ -51,6 +52,7 @@ class Database {
     /**
      *
      * @param swap {{
+     *     blockNumber: string,
      *     pair: string,
      *     ticker: string,
      *     sender: string,
@@ -77,6 +79,67 @@ class Database {
     async fetchSwaps() {
         return await this.client
             .collection('swaps')
+            .get();
+    }
+
+    /**
+     *
+     * @param mint {{
+     *     blockNumber: string,
+     *     sender: string,
+     *     amount: {
+     *         token0: string,
+     *         token1: string,
+     *     },
+     * }}
+     * @returns {Promise<void>}
+     */
+    async storeMint(mint) {
+        const docRef = this.client
+            .collection('mints')
+            .doc(uuidv4());
+
+        await docRef.set(mint);
+    }
+
+    /**
+     *
+     * @returns {Promise<FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData, FirebaseFirestore.DocumentData>>}
+     */
+    async fetchMints() {
+        return await this.client
+            .collection('mints')
+            .get();
+    }
+
+    /**
+     *
+     * @param burn {{
+     *     blockNumber: string,
+     *     sender: string,
+     *     to: string,
+     *     amount: {
+     *         token0: string,
+     *         token1: string,
+     *     },
+     * }}
+     * @returns {Promise<void>}
+     */
+    async storeBurn(burn) {
+        const docRef = this.client
+            .collection('burns')
+            .doc(uuidv4());
+
+        await docRef.set(burn);
+    }
+
+    /**
+     *
+     * @returns {Promise<FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData, FirebaseFirestore.DocumentData>>}
+     */
+    async fetchBurns() {
+        return await this.client
+            .collection('burns')
             .get();
     }
 }

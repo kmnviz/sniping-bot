@@ -17,7 +17,9 @@ class Processor {
      * @param token0
      * @param token1
      * @param pairAddress
+     * @param event
      * @returns {Promise<{
+     *     blockNumber: string,
      *     address: string,
      *     token0: {
      *         address: string,
@@ -33,7 +35,7 @@ class Processor {
      *     },
      * }|undefined>}
      */
-    async processCreatedPair(token0, token1, pairAddress) {
+    async processCreatedPair(token0, token1, pairAddress, event) {
         const token0Contract = new Contract(token0, blockchain.erc20Abi, this.provider);
         const token1Contract = new Contract(token1, blockchain.erc20Abi, this.provider);
         const pairContract = new Contract(pairAddress, blockchain.uniSwapV2PairAbi, this.provider);
@@ -41,7 +43,7 @@ class Processor {
         // Track only WETH pairs
         if (![token0, token1].includes(blockchain.wethAddress)) {
             console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
-            console.log(`Not WETH pair - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+            console.log(`Not a WETH pair - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
             console.log('----------');
             return;
         }
@@ -54,22 +56,23 @@ class Processor {
             return;
         }
 
-        // Track only pairs with reserves
         const reserves = await pairContract.getReserves();
-        if (reserves[0] <= 0 && reserves[1] <= 0) {
-            console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
-            console.log(`Pair with no reserves - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
-            console.log('----------');
-            return;
-        }
+
+        // Track only pairs with reserves
+        // if (reserves[0] <= 0 && reserves[1] <= 0) {
+        //     console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
+        //     console.log(`Pair with no reserves - token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`);
+        //     console.log('----------');
+        //     return;
+        // }
 
         // Track pairs with WETH liquidity more than
-        if (Decimal(reserves[1].toString()).lt(Decimal(process.env.MINIMUM_WETH_LIQUIDITY_IN_WEI))) {
-            console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
-            console.log(`Low WETH liquidity pair - liquidity: ${reserves[1].toString()}, token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`)
-            console.log('----------');
-            return;
-        }
+        // if (Decimal(reserves[1].toString()).lt(Decimal(process.env.MINIMUM_WETH_LIQUIDITY_IN_WEI))) {
+        //     console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'));
+        //     console.log(`Low WETH liquidity pair - liquidity: ${reserves[1].toString()}, token0: ${token0}; token1: ${token1}; pairAddress: ${pairAddress}`)
+        //     console.log('----------');
+        //     return;
+        // }
 
         // Check percentage liquidity provided
         const token0Decimals = (await token0Contract.decimals()).toString();
@@ -127,6 +130,7 @@ Good luck 🍀
         }
 
         return {
+            blockNumber: event.blockNumber.toString(),
             address: pairAddress,
             token0: {
                 address: token0,
@@ -167,6 +171,7 @@ Good luck 🍀
      * @param amount1Out {string}
      * @param to {string}
      * @param wethPrice {string}
+     * @param event {object}
      * @returns {Promise<{
      *     pair: string,
      *     ticker: string,
@@ -193,6 +198,7 @@ Good luck 🍀
         amount1Out,
         to,
         wethPrice,
+        event,
     ) {
         let token0PriceInWeth, token0PriceInUsdc;
 
@@ -219,6 +225,7 @@ Good luck 🍀
         }
 
         return {
+            blockNumber: event.blockNumber.toString(),
             pair: pairData.address,
             ticker: `${pairData.token0.symbol}/${pairData.token1.symbol}`,
             sender: sender,
@@ -286,6 +293,18 @@ Good luck 🍀
             console.log('Failed to calculate weth price in usdc. error: ', error);
             throw error;
         }
+    }
+
+    /**
+     *
+     * @param tokenAddress
+     * @returns {Promise<boolean>}
+     */
+    async isContractRenounced(tokenAddress) {
+        const contract = new Contract(tokenAddress, blockchain.erc20Abi, provider);
+        const owner = await contract.owner();
+
+        return owner === '0x0000000000000000000000000000000000000000';
     }
 
     async isLiquidityLocked(pairAddress) {
