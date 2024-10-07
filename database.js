@@ -86,6 +86,8 @@ class Database {
     /**
      *
      * @param mint {{
+     *     pair: string,
+     *     ticker: string,
      *     sender: string,
      *     amount: {
      *         token0: string,
@@ -111,6 +113,8 @@ class Database {
     /**
      *
      * @param burn {{
+     *     pair: string,
+     *     ticker: string,
      *     sender: string,
      *     to: string,
      *     amount: {
