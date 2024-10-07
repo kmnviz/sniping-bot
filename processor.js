@@ -17,9 +17,7 @@ class Processor {
      * @param token0
      * @param token1
      * @param pairAddress
-     * @param event
      * @returns {Promise<{
-     *     blockNumber: string,
      *     address: string,
      *     token0: {
      *         address: string,
@@ -35,7 +33,7 @@ class Processor {
      *     },
      * }|undefined>}
      */
-    async processCreatedPair(token0, token1, pairAddress, event) {
+    async processCreatedPair(token0, token1, pairAddress) {
         const token0Contract = new Contract(token0, blockchain.erc20Abi, this.provider);
         const token1Contract = new Contract(token1, blockchain.erc20Abi, this.provider);
         const pairContract = new Contract(pairAddress, blockchain.uniSwapV2PairAbi, this.provider);
@@ -130,7 +128,6 @@ Good luck 🍀
         }
 
         return {
-            blockNumber: event.blockNumber.toString(),
             address: pairAddress,
             token0: {
                 address: token0,
@@ -171,7 +168,6 @@ Good luck 🍀
      * @param amount1Out {string}
      * @param to {string}
      * @param wethPrice {string}
-     * @param event {object}
      * @returns {Promise<{
      *     pair: string,
      *     ticker: string,
@@ -198,7 +194,6 @@ Good luck 🍀
         amount1Out,
         to,
         wethPrice,
-        event,
     ) {
         let token0PriceInWeth, token0PriceInUsdc;
 
@@ -225,7 +220,6 @@ Good luck 🍀
         }
 
         return {
-            blockNumber: event.blockNumber.toString(),
             pair: pairData.address,
             ticker: `${pairData.token0.symbol}/${pairData.token1.symbol}`,
             sender: sender,

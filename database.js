@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Firestore } = require('@google-cloud/firestore');
 const { v4: uuidv4 } = require('uuid');
 
@@ -11,10 +12,19 @@ class Database {
         });
     }
 
+    async store(collection, document) {
+        if (+process.env.STORE_TO_DB) {
+            const docRef = this.client
+                .collection(collection)
+                .doc(uuidv4());
+
+            await docRef.set(document);
+        }
+    }
+
     /**
      *
      * @param pair{{
-     *     blockNumber: string,
      *     address: string,
      *     token0: {
      *         address: string,
@@ -32,11 +42,7 @@ class Database {
      * @returns {Promise<void>}
      */
     async storePair(pair) {
-        const docRef = this.client
-            .collection('pairs')
-            .doc(uuidv4());
-
-        await docRef.set(pair);
+        await this.store('pairs', pair);
     }
 
     /**
@@ -52,7 +58,6 @@ class Database {
     /**
      *
      * @param swap {{
-     *     blockNumber: string,
      *     pair: string,
      *     ticker: string,
      *     sender: string,
@@ -65,11 +70,7 @@ class Database {
      * @returns {Promise<void>}
      */
     async storeSwap(swap) {
-        const docRef = this.client
-            .collection('swaps')
-            .doc(uuidv4());
-
-        await docRef.set(swap);
+        await this.store('swaps', swap);
     }
 
     /**
@@ -85,7 +86,6 @@ class Database {
     /**
      *
      * @param mint {{
-     *     blockNumber: string,
      *     sender: string,
      *     amount: {
      *         token0: string,
@@ -95,11 +95,7 @@ class Database {
      * @returns {Promise<void>}
      */
     async storeMint(mint) {
-        const docRef = this.client
-            .collection('mints')
-            .doc(uuidv4());
-
-        await docRef.set(mint);
+        await this.store('mints', mint);
     }
 
     /**
@@ -115,7 +111,6 @@ class Database {
     /**
      *
      * @param burn {{
-     *     blockNumber: string,
      *     sender: string,
      *     to: string,
      *     amount: {
@@ -126,11 +121,7 @@ class Database {
      * @returns {Promise<void>}
      */
     async storeBurn(burn) {
-        const docRef = this.client
-            .collection('burns')
-            .doc(uuidv4());
-
-        await docRef.set(burn);
+        await this.store('burns', burn);
     }
 
     /**

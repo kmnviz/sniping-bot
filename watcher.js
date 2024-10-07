@@ -60,9 +60,9 @@ class Watcher {
     async watchPairsCreated() {
         const uniSwapV2Factory = new Contract(blockchain.uniSwapV2FactoryAddress, blockchain.uniSwapV2FactoryAbi, this.provider);
 
-        uniSwapV2Factory.on('PairCreated', async (token0, token1, pairAddress, event) => {
+        uniSwapV2Factory.on('PairCreated', async (token0, token1, pairAddress) => {
             try {
-                const createdPair = await this.processor.processCreatedPair(token0, token1, pairAddress, event);
+                const createdPair = await this.processor.processCreatedPair(token0, token1, pairAddress);
                 if (createdPair) {
                     await this.database.storePair(createdPair);
 
@@ -92,7 +92,7 @@ class Watcher {
     }
 
     watchPairEvents(pairContract, pairData) {
-        pairContract.on('Swap', async (sender, amount0In, amount1In, amount0Out, amount1Out, to, event) => {
+        pairContract.on('Swap', async (sender, amount0In, amount1In, amount0Out, amount1Out, to) => {
             try {
                 const swap = await this.processor.processPairSwap(
                     pairData,
@@ -103,7 +103,6 @@ class Watcher {
                     amount1Out.toString(),
                     to,
                     this.wethPrice,
-                    event,
                 );
 
                 await this.database.storeSwap(swap);
@@ -113,10 +112,9 @@ class Watcher {
             }
         });
 
-        pairContract.on('Mint', async (sender, amount0, amount1, event) => {
+        pairContract.on('Mint', async (sender, amount0, amount1) => {
             try {
                 await this.database.storeMint({
-                    blockNumber: event.blockNumber.toString(),
                     sender: sender,
                     amount: {
                         token0: amount0.toString(),
@@ -129,10 +127,9 @@ class Watcher {
             }
         });
 
-        pairContract.on('Burn', async (sender, amount0, amount1, to, event) => {
+        pairContract.on('Burn', async (sender, amount0, amount1, to) => {
             try {
                 await this.database.storeBurn({
-                    blockNumber: event.blockNumber.toString(),
                     sender: sender,
                     to: to,
                     amount: {
