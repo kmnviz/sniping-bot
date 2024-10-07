@@ -107,7 +107,7 @@ class Processor {
 ticker: ${safeTelegramFormat(token0Symbol)} / ${token1Symbol}
 liquidity: ${safeTelegramFormat(liquidityToken0)} / ${safeTelegramFormat(liquidityToken1)}
 liquidity percentage: ${safeTelegramFormat(liquidityPercentageToken0)}%
-token price: $${safeTelegramFormat(tokenPriceInUsdc)}
+token price: $${safeTelegramFormat(!isNaN(tokenPriceInUsdc) ? tokenPriceInUsdc : 0)}
 
 ${dextools} ${etherscan}
 
